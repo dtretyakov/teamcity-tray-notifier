@@ -1,8 +1,16 @@
 {
   "name": "teamcity-tray-notifier",
+  "productName": "TeamCity Tray Notifier",
   "main": "electron-app.js",
   "devDependencies": {
-    "electron-rebuild": "^1.1.5"
+    "electron-packager": "^7.0.3",
+    "electron-prebuilt": "^1.2.2"
+  },
+  "scripts": {
+    "build-binaries-all": "electron-packager . --all --out=out",
+    "build-binaries-mac": "electron-packager . --platform=darwin --arch=x64 --out=out --icon=teamcity",
+    "build-binaries-win": "electron-packager . --platform=win32 --arch=x64 --out=out --icon=teamcity",
+    "build-binaries-lin": "electron-packager . --platform=linux --arch=x64 --out=out --icon=teamcity"
   },
   "version": "0.1.0"
 }
