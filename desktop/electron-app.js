@@ -51,7 +51,7 @@ function putInTray() {
             }
         }
     ]);
-    appIcon.setToolTip('teamcity-tray-notifier');
+    appIcon.setToolTip(productNameVersion);
     appIcon.setContextMenu(contextMenu);
 }
 
