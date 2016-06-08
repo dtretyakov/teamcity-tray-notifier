@@ -6,8 +6,9 @@ const ipc = electron.ipcMain;
 const path = require('path');
 const clipboard = require('electron').clipboard;
 
-let win;
 let notificationsWin;
+let loginWin;
+
 let appIcon = null;
 let pkg = require('./package');
 let productNameVersion = pkg.productName + ' v' + pkg.version;
@@ -20,6 +21,15 @@ function putInTray() {
             label: productNameVersion,
             click: function () {
                 clipboard.writeText(productNameVersion);
+            }
+        },
+        {
+            type: 'separator'
+        },
+        {
+            label: 'Login...',
+            click: function () {
+                createLoginWindow();
             }
         },
         {
@@ -62,6 +72,20 @@ function createNotificationsWindow() {
 
     notificationsWin.on('closed', () => {
         notificationsWin = null;
+    });
+}
+
+function createLoginWindow() {
+    loginWin = new BrowserWindow({
+        width: 450,
+        height: 430
+    });
+
+    loginWin.loadURL('http://unit-631:8111/bs/win32/userStatus.html');
+    // loginWin.loadURL('http://unit-631:8111/bs/win32/login.html');
+
+    loginWin.on('closed', () => {
+        loginWin = null;
     });
 }
 
