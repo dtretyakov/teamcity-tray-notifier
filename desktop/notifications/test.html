@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+    <head>
+        <title>test notifications</title>
+        <script>
+const ipc = require('electron').ipcRenderer;
+const Window = require('electron').remote;
+const path = require('path');
+
+ipc.on('test-notification', function () {
+    createTestNotification();
+});
+
+function createTestNotification() {
+    let notificationOptions = {
+        title: 'Title from options',
+        body: 'Lorem Ipsum Dolor Sit Amet'
+    };
+
+    if (process.platform === 'darwin') {
+        notificationOptions.icon = path.join(__dirname, 'icon.png');
+    }
+    new Notification(notificationOptions.title, notificationOptions);
+}
+        </script>
+    </head>
+    <body class="app">
+		<p>This is invisible page to send Notifications from (by means of HTML5)</p>
+        <p>Use `Send test notification action` from toolbar context menu to trigger one.</p>
+    </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "teamcity-tray-notifier",
+  "main": "electron-app.js",
+  "devDependencies": {
+    "electron-rebuild": "^1.1.5"
+  },
+  "version": "0.1.0"
+}

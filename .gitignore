@@ -43,3 +43,6 @@ fabric.properties
 # Build artifacts
 .gradle
 build
+
+# NPM modules 
+node_modules
