@@ -4,15 +4,27 @@ const {app} = electron;
 const {BrowserWindow} = electron;
 const ipc = electron.ipcMain;
 const path = require('path');
+const clipboard = require('electron').clipboard;
 
 let win;
 let notificationsWin;
 let appIcon = null;
+let pkg = require('./package');
+let productNameVersion = pkg.productName + ' v' + pkg.version;
 
 function putInTray() {
     const iconPath = path.join(__dirname,'icon.png');
     appIcon = new electron.Tray(iconPath);
     const contextMenu = electron.Menu.buildFromTemplate([
+        {
+            label: productNameVersion,
+            click: function () {
+                clipboard.writeText(productNameVersion);
+            }
+        },
+        {
+            type: 'separator'
+        },
         {
             label: 'Send test notification',
             click: function () {
