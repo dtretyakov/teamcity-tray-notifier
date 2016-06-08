@@ -30,6 +30,8 @@ project(':plugin-notifier-server') {
 
     dependencies {
         compile 'org.jetbrains.teamcity:server-api:9.0'
+        compile 'org.atmosphere:atmosphere-runtime:2.4.4'
+        compile 'com.google.code.gson:gson:2.5'
         runtime 'javax.servlet:jstl:1.1.2'
         testCompile 'org.testng:testng:6.8'
     }

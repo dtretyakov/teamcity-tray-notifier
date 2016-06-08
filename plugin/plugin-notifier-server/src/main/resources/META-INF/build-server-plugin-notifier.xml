@@ -4,5 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
        default-autowire="constructor">
     <bean class="jetbrains.buildServer.notification.tray.TrayNotificator"/>
-    <bean class="jetbrains.buildServer.notification.tray.TrayNotifierSettingsExtension"/>
+    <bean class="jetbrains.buildServer.notification.tray.web.SettingsPageExtension"/>
+    <bean class="jetbrains.buildServer.notification.tray.web.NotificationController"/>
+    <bean class="jetbrains.buildServer.notification.tray.web.NotificationHandler"/>
+    <bean class="org.atmosphere.cpr.DefaultAtmosphereResourceSessionFactory"/>
+    <bean class="org.atmosphere.cpr.DefaultAtmosphereResourceFactory"/>
+    <bean class="org.atmosphere.cpr.BroadcasterFactory"/>
 </beans>
