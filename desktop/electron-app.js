@@ -94,4 +94,4 @@ app.on('ready', function() {
     putInTray();
 });
 
-app.dock.hide();
+app.dock && app.dock.hide();

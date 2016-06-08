@@ -12,5 +12,5 @@
     "build-binaries-win": "electron-packager . --platform=win32 --arch=x64 --out=out --icon=teamcity",
     "build-binaries-lin": "electron-packager . --platform=linux --arch=x64 --out=out --icon=teamcity"
   },
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
