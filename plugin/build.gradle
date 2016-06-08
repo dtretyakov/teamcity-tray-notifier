@@ -1,5 +1,5 @@
 def versionNumber = System.getenv('versionNumber') != null ? System.getenv('versionNumber') : 'SNAPSHOT'
-ext.projectIds = ['group': 'teamcity-tray-notifier-plugin', 'version': versionNumber, 'artifact': 'tray-notifier-plugin']
+ext.projectIds = ['group': 'teamcity-tray-notifier-plugin', 'version': versionNumber]
 
 group = projectIds.group
 version = projectIds.version
@@ -12,6 +12,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     sourceCompatibility = 1.6
+    targetCompatibility = 1.6
 
     repositories {
         mavenCentral()
@@ -26,21 +27,21 @@ subprojects {
 }
 
 project(':plugin-notifier-server') {
+
     dependencies {
         compile 'org.jetbrains.teamcity:server-api:9.0'
-        compile 'com.google.code.gson:gson:2.5'
         runtime 'javax.servlet:jstl:1.1.2'
+        testCompile 'org.testng:testng:6.8'
     }
     
-    task distrib(type: Zip) {
-        archiveName = projectIds.artifact + ".zip"
+    task distrib(type: Zip, dependsOn: [jar]) {
+        archiveName = "tray-notifier-plugin.zip"
     
         from (libsDir) {
             into 'server'
         }
         
         from (configurations.compile) {
-            include 'gson-*.jar'
             include 'plugin-notifier-*.jar'
             into 'server'
         }

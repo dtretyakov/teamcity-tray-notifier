@@ -3,7 +3,7 @@
                  xsi:noNamespaceSchemaLocation="urn:shemas-jetbrains-com:teamcity-plugin-v1-xml">
     <info>
         <name>tray-notifier</name>
-        <display-name>TeamCity tray Notifier</display-name>
+        <display-name>TeamCity Tray Notifier</display-name>
         <version>@Plugin_Version@</version>
         <description>Provides cross-platform desktop notifications</description>
         <download-url>https://github.com/dtretyakov/teamcity-tray-notifier</download-url>
