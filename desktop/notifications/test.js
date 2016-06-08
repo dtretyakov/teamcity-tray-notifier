@@ -12,12 +12,14 @@ function createTestNotification() {
         body: 'Lorem Ipsum Dolor Sit Amet'
     };
 
-    // if (process.platform === 'darwin') {
-    notificationOptions.icon = path.join(__dirname, 'icon.png');
-    // }
+    if (process.platform === 'darwin') {
+        notificationOptions.icon = path.join(__dirname, 'icon.png');
+    }
     let notification = new Notification(notificationOptions.title, notificationOptions);
-    
+
     notification.addEventListener('click', function() {
         shell.openExternal('https://github.com/dtretyakov/teamcity-tray-notifier');
     });
 }
+
+document.querySelector('#btn').addEventListener('click', createTestNotification);
