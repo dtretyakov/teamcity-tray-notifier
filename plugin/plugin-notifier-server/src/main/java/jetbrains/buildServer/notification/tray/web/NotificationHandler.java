@@ -12,8 +12,10 @@ import org.atmosphere.handler.AbstractReflectorAtmosphereHandler;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Notification request handler.
@@ -21,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
     private static final Logger LOG = Logger.getInstance(NotificationHandler.class.getName());
     private static final String USER_ID = "USER_ID";
-    private static final Map<Long, AtmosphereResource> myResources = new ConcurrentHashMap<Long, AtmosphereResource>();
+    private static final Map<Long, Queue<AtmosphereResource>> myResources = new ConcurrentHashMap<Long, Queue<AtmosphereResource>>();
     private final Gson myGson = new Gson();
 
     @Override
@@ -83,9 +85,15 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
 
         LOG.debug("WebSocket connection is opened by " + currentUser.getUsername() + ". Connection UUID: " + resource.uuid());
 
+        // Store connection
         AtmosphereResourceSessionFactory.getDefault().getSession(resource).setAttribute(USER_ID, currentUser.getId());
-        myResources.put(currentUser.getId(), resource);
+        Queue<AtmosphereResource> resources = myResources.get(currentUser.getId());
+        if (resources == null){
+            resources = new ConcurrentLinkedQueue<AtmosphereResource>();
+            myResources.put(currentUser.getId(), resources);
+        }
 
+        resources.add(resource);
         resource.suspend();
     }
 
@@ -123,7 +131,9 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
 
     private void removeResource(AtmosphereResource resource) {
         final Long userId = AtmosphereResourceSessionFactory.getDefault().getSession(resource).getAttribute(USER_ID, Long.class);
-        myResources.remove(userId);
+        final Queue<AtmosphereResource> resources = myResources.get(userId);
+        if (resources == null) return;
+        resources.remove(resource);
     }
 
     private AtmosphereResource getOriginalResource(AtmosphereResource resource) throws IOException {
@@ -150,9 +160,11 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
     public void broadcast(Notification notification, Set<SUser> users) {
         final String message = myGson.toJson(notification);
         for (SUser user : users) {
-            final AtmosphereResource resource = myResources.get(user.getId());
-            if (resource == null) continue;
-            resource.getBroadcaster().broadcast(message);
+            final Queue<AtmosphereResource> resources = myResources.get(user.getId());
+            if (resources == null) continue;
+            for (AtmosphereResource resource : resources) {
+                resource.getBroadcaster().broadcast(message);
+            }
         }
     }
 }
