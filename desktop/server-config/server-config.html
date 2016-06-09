@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Configure servers</title>
+        <style>
+            input {
+                width: 100%;
+                line-height: 2em;
+            }
+
+            input:invalid {
+                outline: 1px solid red;
+            }
+        </style>
+    </head>
+    <body class="app">
+        <h1>Here you can configure something</h1>
+		<p>Enter server URL:</p>
+        <div><input type="url" required id="server-url" value="http://unit-631:8191/"></div>
+        <button type="button" id="btn">Save</button>
+        <div class="debug"></div>
+        <script src="./server-config-browser.js"></script>
+    </body>
+</html>

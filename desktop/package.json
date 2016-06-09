@@ -3,6 +3,7 @@
   "productName": "TeamCity Tray Notifier",
   "main": "electron-app.js",
   "devDependencies": {
+    "devtron": "^1.2.0",
     "electron-packager": "^7.0.3",
     "electron-prebuilt": "^1.2.2"
   },

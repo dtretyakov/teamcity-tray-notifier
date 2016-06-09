@@ -11,23 +11,47 @@ const {
 } = electron;
 const path = require('path');
 
+let createNotificationsWindow = require('./notifications/notifications-window');
+let createServerConfigurationWindow = require('./server-config/server-config.js');
+let createStatsWindow = require('./stats/stats');
 let notificationsWin;
 let loginWin;
 
 let isAuthenticated = false;
-let serverURL;
+let serverURL = null;
 
 let appIcon = null;
 let contextMenu;
 let pkg = require('./package');
 let productNameVersion = pkg.productName + ' v' + pkg.version;
 
-if (!process.env.TEAMCITY_URL) {
-    dialog.showErrorBox('Unexpected errro', 'TEAMCITY_URL is not specified');
-    app.quit();
-} else {
-    serverURL = process.env.TEAMCITY_URL;
-}
+ipc.on('put-in-tray', putInTray);
+
+ipc.on('remove-tray', () => {
+    appIcon.destroy();
+});
+
+ipc.on('server-url-updated', (e, newServerURL) => {
+    if (/[^/]$/.test(newServerURL)) {
+        newServerURL += '/';
+    }
+
+    serverURL = newServerURL;
+
+    doLogin();
+});
+
+app.on('ready', function() {
+    notificationsWin = createNotificationsWindow();
+    putInTray();
+    if (!serverURL) {
+        createServerConfigurationWindow();
+    } else {
+        doLogin();
+    }
+});
+
+app.dock && app.dock.hide();
 
 function putInTray() {
     const iconPath = path.join(__dirname,'icon.png');
@@ -77,41 +101,28 @@ function putInTray() {
     ]);
     appIcon.setToolTip(productNameVersion);
 
+    let loginOrProfile = function () {
+        if (isAuthenticated) {
+            createStatsWindow(serverURL);
+        } else {
+            doLogin();
+        }
+    };
 
     /*
         TrayIcon:
-        - open login window on click
+        - open login/profile window on click
         - and context menu on right click
     */
     if (process.platform !== 'darwin') {
         appIcon.setContextMenu(contextMenu);
-        appIcon.on('click', doLogin);
+        appIcon.on('click', loginOrProfile);
     } else {
-        appIcon.on('click', doLogin);
+        appIcon.on('click', loginOrProfile);
         appIcon.on('right-click', () => {
             appIcon.popUpContextMenu(contextMenu);
         });
     }
-}
-
-ipc.on('put-in-tray', putInTray);
-
-ipc.on('remove-tray', () => {
-    appIcon.destroy();
-});
-
-function createNotificationsWindow() {
-    notificationsWin = new BrowserWindow({
-        width: 100,
-        height: 100,
-        show: false
-    });
-
-    notificationsWin.loadURL(`file://${__dirname}/notifications/test.html`);
-
-    notificationsWin.on('closed', () => {
-        notificationsWin = null;
-    });
 }
 
 function doLogin() {
@@ -119,12 +130,15 @@ function doLogin() {
     loginWin = new BrowserWindow({
         width: 1000,
         height: 800,
-        show: false
+        webPreferences: {
+            nodeIntegration: false
+        },
+        show: true
     });
 
-    loginWin.loadURL(`${serverURL}`);
-
     let webContents = loginWin.webContents;
+
+    loginWin.loadURL(`${serverURL}`);
 
     webContents.on('did-get-redirect-request', (evt, oldURL, newURL, isMainFrame, httpResponseCode) => {
         if (httpResponseCode == 302 && /login\.html/.test(newURL)) {
@@ -153,6 +167,11 @@ function doLogin() {
         }
     });
 
+    webContents.on('did-fail-load', () => {
+        dialog.showErrorBox('could not load login page', 'network error');
+        loginWin.close();
+    });
+
     loginWin.on('closed', () => {
         loginWin = null;
     });
@@ -176,11 +195,3 @@ function toggleLoginLogoutStatus() {
     contextMenu.items[2].enabled = !isAuthenticated;
     contextMenu.items[3].enabled = isAuthenticated;
 }
-
-app.on('ready', function() {
-    createNotificationsWindow();
-    putInTray();
-    doLogin();
-});
-
-app.dock && app.dock.hide();
