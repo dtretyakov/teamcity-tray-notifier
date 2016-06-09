@@ -24,6 +24,8 @@ function createServerConfigurationWindow() {
     serverConfigurationWindow.on('closed', () => {
         serverConfigurationWindow = null;
     });
+
+    return serverConfigurationWindow;
 }
 
 module.exports = createServerConfigurationWindow;

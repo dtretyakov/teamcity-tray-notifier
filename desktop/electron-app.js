@@ -11,19 +11,22 @@ const {
 } = electron;
 const path = require('path');
 
-let createNotificationsWindow = require('./notifications/notifications-window');
-let createServerConfigurationWindow = require('./server-config/server-config.js');
-let createStatsWindow = require('./stats/stats');
-let notificationsWin;
-let loginWin;
-
-let isAuthenticated = false;
+let getServerUrl = require('./server-url');
 let serverURL = null;
+
+let windowManager = require('./window-manager');
+let isAuthenticated = false;
 
 let appIcon = null;
 let contextMenu;
 let pkg = require('./package');
 let productNameVersion = pkg.productName + ' v' + pkg.version;
+
+windowManager.registerWindow('__notifications', require('./notifications/notifications-window'));
+windowManager.registerWindow('__server-config', require('./server-config/server-config'));
+windowManager.registerWindow('__sockets', require('./socket-client/socket-client'));
+
+let loginWin;
 
 ipc.on('put-in-tray', putInTray);
 
@@ -41,11 +44,24 @@ ipc.on('server-url-updated', (e, newServerURL) => {
     doLogin();
 });
 
+ipc.on('show-configuration-window', () => {
+    windowManager.getOrCreateWindow('__server-config');
+});
+
 app.on('ready', function() {
-    notificationsWin = createNotificationsWindow();
     putInTray();
+    serverURL = getServerUrl();
+
+    let notificationsWin = windowManager.getOrCreateWindow('__notifications');
+
     if (!serverURL) {
-        createServerConfigurationWindow();
+        notificationsWin.webContents.on('dom-ready', () => {
+            notificationsWin.webContents.send('send-notification',
+                productNameVersion,
+                'click here to configure TeamCity server URL',
+                'show-configuration-window'
+            );
+        });
     } else {
         doLogin();
     }
@@ -86,6 +102,7 @@ function putInTray() {
         {
             label: 'Send test notification',
             click: function () {
+                let notificationsWin = windowManager.getOrCreateWindow('__notifications');
                 notificationsWin.webContents.send('test-notification');
             }
         },
@@ -99,11 +116,11 @@ function putInTray() {
             }
         }
     ]);
-    appIcon.setToolTip(productNameVersion);
+    appIcon.setToolTip(`OFFLINE (${productNameVersion})`);
 
-    let loginOrProfile = function () {
+    let loginOrConnect = function () {
         if (isAuthenticated) {
-            createStatsWindow(serverURL);
+            windowManager.getOrCreateWindow('__sockets', serverURL);
         } else {
             doLogin();
         }
@@ -116,9 +133,9 @@ function putInTray() {
     */
     if (process.platform !== 'darwin') {
         appIcon.setContextMenu(contextMenu);
-        appIcon.on('click', loginOrProfile);
+        appIcon.on('click', loginOrConnect);
     } else {
-        appIcon.on('click', loginOrProfile);
+        appIcon.on('click', loginOrConnect);
         appIcon.on('right-click', () => {
             appIcon.popUpContextMenu(contextMenu);
         });
@@ -152,6 +169,7 @@ function doLogin() {
                     isAuthenticated = true;
                     toggleLoginLogoutStatus();
                     loginWin.close();
+                    windowManager.getOrCreateWindow('__sockets', serverURL);
                 } else {
                     dialog.showErrorBox('Unexpected navigation', `Login page => '${url}'`);
                 }
@@ -164,6 +182,7 @@ function doLogin() {
             isAuthenticated = true;
             toggleLoginLogoutStatus();
             loginWin.close();
+            windowManager.getOrCreateWindow('__sockets', serverURL);
         }
     });
 
@@ -192,6 +211,7 @@ function logout() {
 }
 
 function toggleLoginLogoutStatus() {
+    appIcon.setToolTip(`[${serverURL}]: ONLINE (${productNameVersion})`);
     contextMenu.items[2].enabled = !isAuthenticated;
     contextMenu.items[3].enabled = isAuthenticated;
 }
