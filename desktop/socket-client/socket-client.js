@@ -38,4 +38,5 @@ module.exports = function (serverURL) {
         win = null;
     });
 
+    return win;
 };
