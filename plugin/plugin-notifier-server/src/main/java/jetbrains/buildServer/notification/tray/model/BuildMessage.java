@@ -16,7 +16,7 @@ public class BuildMessage implements Message {
 
     @Override
     public String getMessage() {
-        return null;
+        return myMessage;
     }
 
     public void setMessage(final String message) {
