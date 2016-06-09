@@ -10,7 +10,8 @@ package jetbrains.buildServer.notification.tray;
 import jetbrains.buildServer.Build;
 import jetbrains.buildServer.notification.Notificator;
 import jetbrains.buildServer.notification.NotificatorRegistry;
-import jetbrains.buildServer.notification.tray.model.BuildMessage;
+import jetbrains.buildServer.notification.TemplateMessageBuilder;
+import jetbrains.buildServer.notification.tray.model.Notification;
 import jetbrains.buildServer.notification.tray.web.NotificationHandler;
 import jetbrains.buildServer.notification.tray.web.SettingsPageExtension;
 import jetbrains.buildServer.responsibility.ResponsibilityEntry;
@@ -32,10 +33,13 @@ import java.util.*;
 public class TrayNotificator implements Notificator {
 
     private final NotificationHandler myNotificationHandler;
+    private final TemplateMessageBuilder myMessageBuilder;
 
     public TrayNotificator(@NotNull final NotificatorRegistry notificatorRegistry,
                            @NotNull final SettingsPageExtension settingsExtension,
-                           @NotNull final NotificationHandler notificationHandler) {
+                           @NotNull final NotificationHandler notificationHandler,
+                           @NotNull final TemplateMessageBuilder messageBuilder) {
+        myMessageBuilder = messageBuilder;
         notificatorRegistry.register(this);
         settingsExtension.register();
         myNotificationHandler = notificationHandler;
@@ -43,32 +47,44 @@ public class TrayNotificator implements Notificator {
 
     @Override
     public void notifyBuildStarted(@NotNull SRunningBuild build, @NotNull Set<SUser> users) {
-        myNotificationHandler.broadcast(new BuildMessage("started"), users);
+        final Map<String, Object> buildMap = myMessageBuilder.getBuildStartedMap(build, users);
+        final Notification notification = NotificationMapper.mapBuildNotification("started", buildMap);
+        myNotificationHandler.broadcast(notification, users);
     }
 
     @Override
     public void notifyBuildSuccessful(@NotNull SRunningBuild build, @NotNull Set<SUser> users) {
-        myNotificationHandler.broadcast(new BuildMessage("successful"), users);
+        final Map<String, Object> buildMap = myMessageBuilder.getBuildSuccessfulMap(build, users);
+        final Notification notification = NotificationMapper.mapBuildNotification("successful", buildMap);
+        myNotificationHandler.broadcast(notification, users);
     }
 
     @Override
     public void notifyBuildFailed(@NotNull SRunningBuild build, @NotNull Set<SUser> users) {
-        myNotificationHandler.broadcast(new BuildMessage("failed"), users);
+        final Map<String, Object> buildMap = myMessageBuilder.getBuildFailedMap(build, users);
+        final Notification notification = NotificationMapper.mapBuildNotification("failed", buildMap);
+        myNotificationHandler.broadcast(notification, users);
     }
 
     @Override
     public void notifyBuildFailedToStart(@NotNull SRunningBuild build, @NotNull Set<SUser> users) {
-        myNotificationHandler.broadcast(new BuildMessage("failedToStart"), users);
+        final Map<String, Object> buildMap = myMessageBuilder.getBuildFailedToStartMap(build, users);
+        final Notification notification = NotificationMapper.mapBuildNotification("failedToStart", buildMap);
+        myNotificationHandler.broadcast(notification, users);
     }
 
     @Override
     public void notifyBuildFailing(@NotNull SRunningBuild build, @NotNull Set<SUser> users) {
-        myNotificationHandler.broadcast(new BuildMessage("failing"), users);
+        final Map<String, Object> buildMap = myMessageBuilder.getBuildFailingMap(build, users);
+        final Notification notification = NotificationMapper.mapBuildNotification("failing", buildMap);
+        myNotificationHandler.broadcast(notification, users);
     }
 
     @Override
     public void notifyBuildProbablyHanging(@NotNull SRunningBuild build, @NotNull Set<SUser> users) {
-        myNotificationHandler.broadcast(new BuildMessage("probablyHanging"), users);
+        final Map<String, Object> buildMap = myMessageBuilder.getBuildProbablyHangingMap(build, users);
+        final Notification notification = NotificationMapper.mapBuildNotification("probablyHanging", buildMap);
+        myNotificationHandler.broadcast(notification, users);
     }
 
     @Override

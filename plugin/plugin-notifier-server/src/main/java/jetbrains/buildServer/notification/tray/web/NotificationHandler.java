@@ -1,7 +1,8 @@
 package jetbrains.buildServer.notification.tray.web;
 
+import com.google.gson.Gson;
 import com.intellij.openapi.diagnostic.Logger;
-import jetbrains.buildServer.notification.tray.model.Message;
+import jetbrains.buildServer.notification.tray.model.Notification;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.util.SessionUser;
 import jetbrains.buildServer.web.util.WebUtil;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Notification request handler.
@@ -21,6 +24,8 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
     private static final Logger LOG = Logger.getInstance(NotificationHandler.class.getName());
     private static final String USER_ID = "USER_ID";
     private static final Map<Long, AtmosphereResource> myResources = new ConcurrentHashMap<Long, AtmosphereResource>();
+    private final Gson myGson = new Gson();
+    private final ExecutorService pool = Executors.newFixedThreadPool(2);
 
     @Override
     public final void onRequest(AtmosphereResource resource) throws IOException {
@@ -53,7 +58,6 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
     }
 
     private void onMessage(AtmosphereResource resource, String message) {
-        resource.getResponse().write(message);
     }
 
     @Override
@@ -79,10 +83,6 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
 
         AtmosphereResourceSessionFactory.getDefault().getSession(resource).setAttribute(USER_ID, currentUser.getId());
         myResources.put(currentUser.getId(), resource);
-
-        resource.getResponse().write("|connected|");
-
-        resource.suspend();
     }
 
     /**
@@ -143,11 +143,14 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
         onOpen(resource);
     }
 
-    public void broadcast(Message message, Set<SUser> users) {
+    public void broadcast(Notification notification, Set<SUser> users) {
+        final String message = myGson.toJson(notification);
         for (SUser user : users) {
             final AtmosphereResource resource = myResources.get(user.getId());
             if (resource == null) continue;
-            resource.getBroadcaster().broadcast(message.getMessage());
+
+            resource.getBroadcaster().broadcast(message);
+            resource.getResponse().write(message);
         }
     }
 }
