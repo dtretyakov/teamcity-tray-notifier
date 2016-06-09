@@ -1,6 +1,8 @@
-const ipc = require('electron').ipcRenderer;
+const {
+    ipcRenderer: ipc,
+    shell
+} = require('electron');
 const path = require('path');
-const {shell} = require('electron');
 
 ipc.on('test-notification', function () {
     createTestNotification();

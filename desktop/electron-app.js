@@ -1,11 +1,15 @@
 /* teamcity-tray-notifier main process */
 const electron = require('electron');
-const {app} = electron;
-const {BrowserWindow} = electron;
-const ipc = electron.ipcMain;
+const {
+    app,
+    BrowserWindow,
+    clipboard,
+    dialog,
+    ipcMain: ipc,
+    Menu,
+    Tray
+} = electron;
 const path = require('path');
-const clipboard = require('electron').clipboard;
-const dialog = require('electron').dialog;
 
 let notificationsWin;
 let loginWin;
@@ -27,8 +31,8 @@ if (!process.env.TEAMCITY_URL) {
 
 function putInTray() {
     const iconPath = path.join(__dirname,'icon.png');
-    appIcon = new electron.Tray(iconPath);
-    contextMenu = electron.Menu.buildFromTemplate([
+    appIcon = new Tray(iconPath);
+    contextMenu = Menu.buildFromTemplate([
         {
             label: productNameVersion,
             click: function () {
