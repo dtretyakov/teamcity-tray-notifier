@@ -18,7 +18,6 @@ $(function () {
     };
 
     request.onOpen = function (response) {
-        debugger;
         status.text('Connected: ' + response.transport);
     };
 
@@ -27,7 +26,6 @@ $(function () {
     };
 
     request.onMessage = function (response) {
-        debugger;
         content.text(response.responseBody);
     };
 

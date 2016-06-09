@@ -8,7 +8,4 @@
     <bean class="jetbrains.buildServer.notification.tray.web.NotificationController"/>
     <bean class="jetbrains.buildServer.notification.tray.web.NotificationTestController"/>
     <bean class="jetbrains.buildServer.notification.tray.web.NotificationHandler"/>
-    <bean class="org.atmosphere.cpr.DefaultAtmosphereResourceSessionFactory"/>
-    <bean class="org.atmosphere.cpr.DefaultAtmosphereResourceFactory"/>
-    <bean class="org.atmosphere.cpr.BroadcasterFactory"/>
 </beans>

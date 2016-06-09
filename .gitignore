@@ -46,3 +46,4 @@ build
 
 # NPM modules 
 node_modules
+classes/

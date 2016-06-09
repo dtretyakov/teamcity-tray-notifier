@@ -7,7 +7,6 @@ import jetbrains.buildServer.web.util.SessionUser;
 import jetbrains.buildServer.web.util.WebUtil;
 import org.atmosphere.cpr.*;
 import org.atmosphere.handler.AbstractReflectorAtmosphereHandler;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,14 +21,6 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
     private static final Logger LOG = Logger.getInstance(NotificationHandler.class.getName());
     private static final String USER_ID = "USER_ID";
     private static final Map<Long, AtmosphereResource> myResources = new ConcurrentHashMap<Long, AtmosphereResource>();
-    private final AtmosphereResourceSessionFactory mySessionFactory;
-    private final AtmosphereResourceFactory myResourceFactory;
-
-    public NotificationHandler(@NotNull final AtmosphereResourceSessionFactory sessionFactory,
-                               @NotNull final AtmosphereResourceFactory resourceFactory){
-        mySessionFactory = sessionFactory;
-        myResourceFactory = resourceFactory;
-    }
 
     @Override
     public final void onRequest(AtmosphereResource resource) throws IOException {
@@ -46,8 +37,8 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
         if (event.isCancelled() || event.isClosedByApplication() || event.isClosedByClient()) {
             onDisconnect(resource);
         } else if (event.getMessage() != null && List.class.isAssignableFrom(event.getMessage().getClass())) {
-            List<Message> messages = List.class.cast(event.getMessage());
-            for (Message t : messages) {
+            List<String> messages = List.class.cast(event.getMessage());
+            for (String t : messages) {
                 onMessage(resource, t);
             }
         } else if (event.isResuming()) {
@@ -55,14 +46,14 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
         } else if (event.isResumedOnTimeout()) {
             onTimeout(resource);
         } else if (event.isSuspended()) {
-            onMessage(resource, (Message) event.getMessage());
+            onMessage(resource, (String) event.getMessage());
         }
 
         postStateChange(event);
     }
 
-    private void onMessage(AtmosphereResource resource, Message message) {
-        resource.getResponse().write(message.getMessage());
+    private void onMessage(AtmosphereResource resource, String message) {
+        resource.getResponse().write(message);
     }
 
     @Override
@@ -86,8 +77,10 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
 
         LOG.debug("WebSocket connection is opened by " + currentUser.getUsername() + ". Connection UUID: " + resource.uuid());
 
-        mySessionFactory.getSession(resource).setAttribute(USER_ID, currentUser.getId());
+        AtmosphereResourceSessionFactory.getDefault().getSession(resource).setAttribute(USER_ID, currentUser.getId());
         myResources.put(currentUser.getId(), resource);
+
+        resource.getResponse().write("|connected|");
 
         resource.suspend();
     }
@@ -125,13 +118,13 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
     }
 
     private void removeResource(AtmosphereResource resource) {
-        final Long userId = mySessionFactory.getSession(resource).getAttribute(USER_ID, Long.class);
+        final Long userId = AtmosphereResourceSessionFactory.getDefault().getSession(resource).getAttribute(USER_ID, Long.class);
         myResources.remove(userId);
     }
 
     private AtmosphereResource getOriginalResource(AtmosphereResource resource) throws IOException {
         final String originalUUID = (String) resource.getRequest().getAttribute(ApplicationConfig.SUSPENDED_ATMOSPHERE_RESOURCE_UUID);
-        final AtmosphereResource originalResource = myResourceFactory.find(originalUUID);
+        final AtmosphereResource originalResource = AtmosphereResourceFactory.getDefault().find(originalUUID);
         if (originalResource == null) {
             LOG.warn(String.format("Connection received from the unknown client. Current request uuid: %s, original request uuid: %s.", resource.uuid(), originalUUID));
             onRequest(resource);
@@ -154,7 +147,7 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
         for (SUser user : users) {
             final AtmosphereResource resource = myResources.get(user.getId());
             if (resource == null) continue;
-            resource.getResponse().write(message.getMessage());
+            resource.getBroadcaster().broadcast("|" + message.getMessage() + "|");
         }
     }
 }

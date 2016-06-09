@@ -2,7 +2,7 @@
 <teamcity-plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xsi:noNamespaceSchemaLocation="urn:shemas-jetbrains-com:teamcity-plugin-v1-xml">
     <info>
-        <name>tray-notifier</name>
+        <name>trayNotifier</name>
         <display-name>TeamCity Tray Notifier</display-name>
         <version>@Plugin_Version@</version>
         <description>Provides cross-platform desktop notifications</description>
@@ -12,5 +12,5 @@
             <url>http://www.jetbrains.com/</url>
         </vendor>
     </info>
-    <deployment use-separate-classloader="true"/>
+    <deployment use-separate-classloader="false"/>
 </teamcity-plugin>

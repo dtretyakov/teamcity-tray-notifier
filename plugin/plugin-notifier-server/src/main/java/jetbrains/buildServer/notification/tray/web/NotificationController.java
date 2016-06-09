@@ -5,10 +5,7 @@ import jetbrains.buildServer.notification.tray.NotifierConstants;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.atmosphere.cache.UUIDBroadcasterCache;
 import org.atmosphere.client.TrackMessageSizeInterceptor;
-import org.atmosphere.cpr.ApplicationConfig;
-import org.atmosphere.cpr.AtmosphereFramework;
-import org.atmosphere.cpr.AtmosphereRequestImpl;
-import org.atmosphere.cpr.AtmosphereResponseImpl;
+import org.atmosphere.cpr.*;
 import org.atmosphere.interceptor.AtmosphereResourceLifecycleInterceptor;
 import org.atmosphere.interceptor.HeartbeatInterceptor;
 import org.atmosphere.interceptor.IdleResourceInterceptor;
@@ -41,18 +38,12 @@ public class NotificationController extends BaseController {
     @Override
     protected ModelAndView doHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) throws Exception {
         request.setAttribute(ASYNC_SUPPORTED, Boolean.TRUE);
-        myFramework.doCometSupport(AtmosphereRequestImpl.wrap(request), AtmosphereResponseImpl.wrap(response));
+        myFramework.doCometSupport(AtmosphereRequest.wrap(request), AtmosphereResponse.wrap(response));
         return null;
     }
 
     private AtmosphereFramework createFramework() {
         final AtmosphereFramework atmosphereFramework = new AtmosphereFramework();
-        atmosphereFramework.addAtmosphereHandler("*", myNotificationHandler, Arrays.asList(
-                new AtmosphereResourceLifecycleInterceptor(),
-                new HeartbeatInterceptor(),
-                new IdleResourceInterceptor(),
-                new TrackMessageSizeInterceptor()));
-
         atmosphereFramework.addInitParameter(ApplicationConfig.BROADCASTER_SHARABLE_THREAD_POOLS, "true");
         atmosphereFramework.addInitParameter(ApplicationConfig.BROADCASTER_LIFECYCLE_POLICY, "EMPTY");
         atmosphereFramework.addInitParameter(ApplicationConfig.BROADCASTER_MESSAGE_PROCESSING_THREADPOOL_MAXSIZE, "10");
@@ -61,6 +52,13 @@ public class NotificationController extends BaseController {
         atmosphereFramework.addInitParameter(ApplicationConfig.DISABLE_ATMOSPHEREINTERCEPTOR, "true");
         atmosphereFramework.addInitParameter(ApplicationConfig.JSR356_MAPPING_PATH, myPath);
         atmosphereFramework.init();
+
+        atmosphereFramework.getBroadcasterFactory().lookup(myPath, true);
+        atmosphereFramework.addAtmosphereHandler(myPath, myNotificationHandler, Arrays.asList(
+                new AtmosphereResourceLifecycleInterceptor(),
+                new HeartbeatInterceptor(),
+                new IdleResourceInterceptor(),
+                new TrackMessageSizeInterceptor()));
 
         return atmosphereFramework;
     }
