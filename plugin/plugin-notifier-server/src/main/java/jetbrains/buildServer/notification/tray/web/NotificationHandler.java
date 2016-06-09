@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Notification request handler.
@@ -25,7 +23,6 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
     private static final String USER_ID = "USER_ID";
     private static final Map<Long, AtmosphereResource> myResources = new ConcurrentHashMap<Long, AtmosphereResource>();
     private final Gson myGson = new Gson();
-    private final ExecutorService pool = Executors.newFixedThreadPool(2);
 
     @Override
     public final void onRequest(AtmosphereResource resource) throws IOException {
@@ -41,23 +38,28 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
 
         if (event.isCancelled() || event.isClosedByApplication() || event.isClosedByClient()) {
             onDisconnect(resource);
-        } else if (event.getMessage() != null && List.class.isAssignableFrom(event.getMessage().getClass())) {
-            List<String> messages = List.class.cast(event.getMessage());
-            for (String t : messages) {
-                onMessage(resource, t);
+        } else {
+            final Object message = event.getMessage();
+            final AtmosphereResponse response = resource.getResponse();
+            if (message != null && List.class.isAssignableFrom(message.getClass())) {
+                List<String> messages = List.class.cast(message);
+                for (String t : messages) {
+                    onMessage(response, t);
+                }
+            } else if (event.isResuming()) {
+                onResume(resource);
+            } else if (event.isResumedOnTimeout()) {
+                onTimeout(resource);
+            } else if (event.isSuspended()) {
+                onMessage(response, (String) message);
             }
-        } else if (event.isResuming()) {
-            onResume(resource);
-        } else if (event.isResumedOnTimeout()) {
-            onTimeout(resource);
-        } else if (event.isSuspended()) {
-            onMessage(resource, (String) event.getMessage());
         }
 
         postStateChange(event);
     }
 
-    private void onMessage(AtmosphereResource resource, String message) {
+    private void onMessage(AtmosphereResponse response, String message) throws IOException {
+        response.getWriter().write(message);
     }
 
     @Override
@@ -83,6 +85,8 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
 
         AtmosphereResourceSessionFactory.getDefault().getSession(resource).setAttribute(USER_ID, currentUser.getId());
         myResources.put(currentUser.getId(), resource);
+
+        resource.suspend();
     }
 
     /**
@@ -148,8 +152,7 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
         for (SUser user : users) {
             final AtmosphereResource resource = myResources.get(user.getId());
             if (resource == null) continue;
-
-            resource.getResponse().write(message);
+            resource.getBroadcaster().broadcast(message);
         }
     }
 }
