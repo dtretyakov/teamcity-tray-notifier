@@ -28,7 +28,7 @@ public class NotificationController extends BaseController {
 
     public NotificationController(@NotNull final WebControllerManager controllerManager,
                                   @NotNull final NotificationHandler notificationHandler) {
-        myPath = String.format("/%s.html", NotifierConstants.NOTIFIER_TYPE);
+        myPath = String.format("/%s/notifications.html", NotifierConstants.NOTIFIER_TYPE);
         controllerManager.registerController(myPath, this);
         myNotificationHandler = notificationHandler;
         myFramework = createFramework();

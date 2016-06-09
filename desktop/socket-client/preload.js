@@ -13,7 +13,7 @@ global.initEverything = function () {
 
     // We are now ready to cut the request
     var request = {
-        url: document.location.origin + '/trayNotifier.html',
+        url: document.location.origin + '/trayNotifier/notifications.html',
         contentType: 'application/json',
         trackMessageLength: true,
         shared: true,

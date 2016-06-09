@@ -6,6 +6,5 @@
     <bean class="jetbrains.buildServer.notification.tray.TrayNotificator"/>
     <bean class="jetbrains.buildServer.notification.tray.web.SettingsPageExtension"/>
     <bean class="jetbrains.buildServer.notification.tray.web.NotificationController"/>
-    <bean class="jetbrains.buildServer.notification.tray.web.NotificationTestController"/>
     <bean class="jetbrains.buildServer.notification.tray.web.NotificationHandler"/>
 </beans>
