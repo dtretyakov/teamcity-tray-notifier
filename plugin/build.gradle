@@ -44,7 +44,7 @@ project(':plugin-notifier-server') {
         }
         
         from (configurations.compile) {
-            include 'plugin-notifier-*.jar'
+            include 'atmosphere-*.jar'
             into 'server'
         }
         

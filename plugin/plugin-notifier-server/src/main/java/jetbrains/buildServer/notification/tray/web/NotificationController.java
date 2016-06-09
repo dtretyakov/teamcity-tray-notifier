@@ -5,7 +5,10 @@ import jetbrains.buildServer.notification.tray.NotifierConstants;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.atmosphere.cache.UUIDBroadcasterCache;
 import org.atmosphere.client.TrackMessageSizeInterceptor;
-import org.atmosphere.cpr.*;
+import org.atmosphere.cpr.ApplicationConfig;
+import org.atmosphere.cpr.AtmosphereFramework;
+import org.atmosphere.cpr.AtmosphereRequestImpl;
+import org.atmosphere.cpr.AtmosphereResponseImpl;
 import org.atmosphere.interceptor.AtmosphereResourceLifecycleInterceptor;
 import org.atmosphere.interceptor.HeartbeatInterceptor;
 import org.atmosphere.interceptor.IdleResourceInterceptor;
@@ -24,10 +27,12 @@ public class NotificationController extends BaseController {
     private static final String ASYNC_SUPPORTED = "org.apache.catalina.ASYNC_SUPPORTED";
     private final NotificationHandler myNotificationHandler;
     private final AtmosphereFramework myFramework;
+    private final String myPath;
 
     public NotificationController(@NotNull final WebControllerManager controllerManager,
                                   @NotNull final NotificationHandler notificationHandler) {
-        controllerManager.registerController("/" + NotifierConstants.NOTIFIER_TYPE, this);
+        myPath = String.format("/%s.html", NotifierConstants.NOTIFIER_TYPE);
+        controllerManager.registerController(myPath, this);
         myNotificationHandler = notificationHandler;
         myFramework = createFramework();
     }
@@ -42,7 +47,7 @@ public class NotificationController extends BaseController {
 
     private AtmosphereFramework createFramework() {
         final AtmosphereFramework atmosphereFramework = new AtmosphereFramework();
-        atmosphereFramework.addAtmosphereHandler("/", myNotificationHandler, Arrays.asList(
+        atmosphereFramework.addAtmosphereHandler("*", myNotificationHandler, Arrays.asList(
                 new AtmosphereResourceLifecycleInterceptor(),
                 new HeartbeatInterceptor(),
                 new IdleResourceInterceptor(),
@@ -53,6 +58,8 @@ public class NotificationController extends BaseController {
         atmosphereFramework.addInitParameter(ApplicationConfig.BROADCASTER_MESSAGE_PROCESSING_THREADPOOL_MAXSIZE, "10");
         atmosphereFramework.addInitParameter(ApplicationConfig.BROADCASTER_ASYNC_WRITE_THREADPOOL_MAXSIZE, "10");
         atmosphereFramework.addInitParameter(ApplicationConfig.BROADCASTER_CACHE, UUIDBroadcasterCache.class.getName());
+        atmosphereFramework.addInitParameter(ApplicationConfig.DISABLE_ATMOSPHEREINTERCEPTOR, "true");
+        atmosphereFramework.addInitParameter(ApplicationConfig.JSR356_MAPPING_PATH, myPath);
         atmosphereFramework.init();
 
         return atmosphereFramework;
