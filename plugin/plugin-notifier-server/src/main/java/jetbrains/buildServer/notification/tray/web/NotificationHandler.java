@@ -149,7 +149,6 @@ public class NotificationHandler extends AbstractReflectorAtmosphereHandler {
             final AtmosphereResource resource = myResources.get(user.getId());
             if (resource == null) continue;
 
-            resource.getBroadcaster().broadcast(message);
             resource.getResponse().write(message);
         }
     }
