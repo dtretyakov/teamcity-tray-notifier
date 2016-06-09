@@ -2,9 +2,7 @@
 const electron = require('electron');
 const {
     app,
-    BrowserWindow,
     clipboard,
-    dialog,
     ipcMain: ipc,
     Menu,
     Tray
@@ -14,19 +12,25 @@ const path = require('path');
 let getServerUrl = require('./server-url');
 let serverURL = null;
 
-let windowManager = require('./window-manager');
+var windowManager = require('./window-manager');
+global.windowManager = windowManager;
 let isAuthenticated = false;
 
 let appIcon = null;
 let contextMenu;
-let pkg = require('./package');
-let productNameVersion = pkg.productName + ' v' + pkg.version;
+
+let productNameVersion = app.getName() + ' v' + app.getVersion();
 
 windowManager.registerWindow('__notifications', require('./notifications/notifications-window'));
 windowManager.registerWindow('__server-config', require('./server-config/server-config'));
 windowManager.registerWindow('__sockets', require('./socket-client/socket-client'));
+windowManager.registerWindow('__login', require('./login'));
+windowManager.registerWindow('__logout', require('./logout'));
 
-let loginWin;
+global.updateLoginStatus = (newLoginStatus) => {
+    isAuthenticated = newLoginStatus;
+    toggleLoginLogoutStatus();
+};
 
 ipc.on('put-in-tray', putInTray);
 
@@ -143,71 +147,11 @@ function putInTray() {
 }
 
 function doLogin() {
-    let loggingIn = false;
-    loginWin = new BrowserWindow({
-        width: 1000,
-        height: 800,
-        webPreferences: {
-            nodeIntegration: false
-        },
-        show: true
-    });
-
-    let webContents = loginWin.webContents;
-
-    loginWin.loadURL(`${serverURL}`);
-
-    webContents.on('did-get-redirect-request', (evt, oldURL, newURL, isMainFrame, httpResponseCode) => {
-        if (httpResponseCode == 302 && /login\.html/.test(newURL)) {
-            isAuthenticated = false;
-            toggleLoginLogoutStatus();
-            loggingIn = true;
-            loginWin.show();
-
-            webContents.on('will-navigate', (evt, url) => {
-                if (url === oldURL) {
-                    isAuthenticated = true;
-                    toggleLoginLogoutStatus();
-                    loginWin.close();
-                    windowManager.getOrCreateWindow('__sockets', serverURL);
-                } else {
-                    dialog.showErrorBox('Unexpected navigation', `Login page => '${url}'`);
-                }
-            });
-        }
-    });
-
-    webContents.on('did-finish-load', () => {
-        if (!loggingIn) {
-            isAuthenticated = true;
-            toggleLoginLogoutStatus();
-            loginWin.close();
-            windowManager.getOrCreateWindow('__sockets', serverURL);
-        }
-    });
-
-    webContents.on('did-fail-load', () => {
-        dialog.showErrorBox('could not load login page', 'network error');
-        loginWin.close();
-    });
-
-    loginWin.on('closed', () => {
-        loginWin = null;
-    });
+    windowManager.getOrCreateWindow('__login', serverURL);
 }
 
 function logout() {
-    let win = new BrowserWindow({ show: false });
-
-    win.loadURL(`${serverURL}ajax.html?logout=1`);
-
-    let webContents = win.webContents;
-
-    webContents.on('did-finish-load', () => {
-        win.close();
-        isAuthenticated = false;
-        toggleLoginLogoutStatus();
-    });
+    windowManager.getOrCreateWindow('__logout', serverURL);
 }
 
 function toggleLoginLogoutStatus() {

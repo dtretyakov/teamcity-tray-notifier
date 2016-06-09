@@ -13,7 +13,7 @@
     "build-binaries-win": "electron-packager . --platform=win32 --arch=x64 --out=out --icon=teamcity",
     "build-binaries-lin": "electron-packager . --platform=linux --arch=x64 --out=out --icon=teamcity"
   },
-  "version": "0.1.2",
+  "version": "0.1.12",
   "dependencies": {
     "atmosphere.js": "^2.3.2"
   }
