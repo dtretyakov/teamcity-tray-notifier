@@ -1,4 +1,5 @@
 const {
+    app,
     BrowserWindow
 } = require('electron');
 let path = require('path');
@@ -21,7 +22,7 @@ module.exports = function (serverURL) {
         webContents.executeJavaScript('initEverything();', () => {
             webContents.send('get-params', {
                 serverURL,
-                appName: require('../package.json').productName
+                appName: app.getName()
             });
         });
     });

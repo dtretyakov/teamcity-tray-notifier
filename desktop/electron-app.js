@@ -48,6 +48,10 @@ ipc.on('server-url-updated', (e, newServerURL) => {
     doLogin();
 });
 
+ipc.on('toggle-socket-connection-status', (e, isConnected) => {
+    toggleSocketConnectionStatus(isConnected);
+});
+
 ipc.on('show-configuration-window', () => {
     windowManager.getOrCreateWindow('__server-config');
 });
@@ -120,7 +124,7 @@ function putInTray() {
             }
         }
     ]);
-    appIcon.setToolTip(`OFFLINE (${productNameVersion})`);
+    toggleSocketConnectionStatus(false);
 
     let loginOrConnect = function () {
         if (isAuthenticated) {
@@ -154,8 +158,14 @@ function logout() {
     windowManager.getOrCreateWindow('__logout', serverURL);
 }
 
+function toggleSocketConnectionStatus(isConnected) {
+    appIcon.setToolTip(isConnected ?
+        `[${serverURL}]: ONLINE (${productNameVersion})` :
+        `OFFLINE (${productNameVersion})`);
+}
+
 function toggleLoginLogoutStatus() {
-    appIcon.setToolTip(`[${serverURL}]: ONLINE (${productNameVersion})`);
+
     contextMenu.items[2].enabled = !isAuthenticated;
     contextMenu.items[3].enabled = isAuthenticated;
 }

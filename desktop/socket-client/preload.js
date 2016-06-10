@@ -17,12 +17,12 @@ global.initEverything = function () {
         contentType: 'application/json',
         trackMessageLength: true,
         shared: true,
-        transport: transport
-        // ,
-        // fallbackTransport: 'long-polling'
+        transport: transport,
+        fallbackTransport: 'long-polling'
     };
 
     request.onOpen = function (response) {
+        global.ipc.send('toggle-socket-connection-status', true);
         new Notification(`${appName}`, { body: `Connected to [${serverURL}] (${response.transport})` });
     };
 
@@ -35,6 +35,7 @@ global.initEverything = function () {
     };
 
     request.onClose = function () {
+        global.ipc.send('toggle-socket-connection-status', false);
         new Notification(`${appName}`, { body: `Disconnected from [${serverURL}]` });
     };
 
