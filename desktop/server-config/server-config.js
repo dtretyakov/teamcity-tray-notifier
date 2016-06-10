@@ -8,7 +8,7 @@ let serverConfigurationWindow = null;
 /*
     Creates page which sends `server-url-updated` event
 */
-function createServerConfigurationWindow() {
+function createServerConfigurationWindow(serverURL) {
     serverConfigurationWindow = new BrowserWindow({
         width: 500,
         height: 200,
@@ -16,6 +16,10 @@ function createServerConfigurationWindow() {
     });
 
     serverConfigurationWindow.loadURL(`file://${__dirname}/server-config.html`);
+
+    serverConfigurationWindow.webContents.on('dom-loaded', () => {
+        serverConfigurationWindow.webContents.send('got-url', serverURL);
+    });
 
     ipc.on('server-url-updated', () => {
         serverConfigurationWindow.close();

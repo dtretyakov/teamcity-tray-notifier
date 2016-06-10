@@ -8,7 +8,7 @@ const {
 } = electron;
 const path = require('path');
 
-let getServerUrl = require('./server-url');
+let { getServerUrl, saveServerUrl } = require('./server-url');
 let serverURL = null;
 
 var windowManager = require('./window-manager');
@@ -45,6 +45,8 @@ ipc.on('server-url-updated', (e, newServerURL) => {
     }
 
     serverURL = newServerURL;
+    saveServerUrl(serverURL);
+
     doLogin();
 });
 
@@ -53,7 +55,11 @@ ipc.on('toggle-socket-connection-status', (e, isConnected) => {
 });
 
 ipc.on('show-configuration-window', () => {
-    windowManager.getOrCreateWindow('__server-config');
+    windowManager.getOrCreateWindow('__server-config', serverURL);
+});
+
+ipc.on('close-configuration-window', () => {
+    windowManager.getOrCreateWindow('__server-config').close();
 });
 
 app.on('ready', function() {

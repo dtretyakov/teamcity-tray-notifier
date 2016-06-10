@@ -1,8 +1,15 @@
 const PARAMNAME = 'TEAMCITY_TRAY_NOTIFIER_URL';
 let serverURL;
 
-module.exports = function () {
-    serverURL = process.env[PARAMNAME];
+module.exports = {
 
-    return serverURL;
+    getServerUrl: function () {
+        serverURL = process.env[PARAMNAME];
+        return serverURL;
+    },
+
+    saveServerUrl: function (serverURL) {
+        process.env[PARAMNAME] = serverURL;
+    }
+
 };
