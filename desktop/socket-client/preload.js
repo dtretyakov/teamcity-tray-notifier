@@ -31,7 +31,24 @@ global.initEverything = function () {
     };
 
     request.onMessage = function (response) {
-        new Notification(`[${serverURL}]`, { body: response.responseBody });
+        let responseObject = JSON.parse(response.responseBody);
+        let responseText = '';
+
+        switch (responseObject.type) {
+        case 'build':
+            responseText = `${responseObject.build.buildName} #${responseObject.build.buildNumber} ${responseObject.build.status}`;
+            break;
+        case 'investigation':
+            responseText = `investigation Tests: ${responseObject.investigation.tests.length}, Build Problems: ${responseObject.investigation.buildProblems.length}`;
+            break;
+        case 'label':
+            responseText = `${responseObject.label.message}: ${responseObject.label.buildname}@${responseObject.label.root}`;
+            break;
+        case 'test':
+            responseText = `Test "${responseObject.test.testName}" ${responseObject.test.state}`;
+            break;
+        }
+        new Notification(`[${serverURL}]`, { body: responseText });
     };
 
     request.onClose = function () {
