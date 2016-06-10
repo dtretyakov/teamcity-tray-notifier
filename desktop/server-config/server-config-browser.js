@@ -34,3 +34,5 @@ function validateURL(url) {
 ipc.on('got-url', (e, url) => {
     serverUrlInput.value = url;
 });
+
+serverUrlInput.focus();

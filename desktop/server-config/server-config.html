@@ -3,13 +3,18 @@
     <head>
         <title>Configure servers</title>
         <style>
-            input {
-                width: 100%;
+            input[type='url'] {
+                width: calc(100% - 2.25em);
                 line-height: 2em;
+                margin: 0 calc(0.75em);
+                font-size: 1.5em;
             }
 
             input:invalid {
                 outline: 1px solid red;
+            }
+            .debug {
+                display: none;
             }
 body {
   overflow: hidden;
@@ -22,6 +27,7 @@ body {
   background-color: #575757;
   border-bottom: 2px solid #393939;
   font-weight: bold;
+  margin-bottom: 2em;
 }
 
 #header .title {
@@ -142,6 +148,93 @@ p.messageEmpty {
   margin: 1em;
 }
 
+.btn,
+.ui-datepicker-buttonpane button {
+  display: inline-block;
+  padding: 5px 14px 6px;
+  outline: 0;
+  cursor: pointer;
+
+  background-color: #e6e6e6;
+  background-repeat: no-repeat;
+  background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+  background-image: linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#e6e6e6', GradientType=0);
+
+  color: #333;
+  font-size: 13px;
+  line-height: normal;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+
+  border: 1px solid #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 4px;
+
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.btn:hover,
+.ui-datepicker-buttonpane button:hover {
+  background-position: 0 -15px;
+  filter: none;
+
+  color: #333;
+  text-decoration: none;
+
+  -webkit-transition: background-position 0.1s linear;
+  transition: background-position 0.1s linear;
+}
+.btn:focus,
+.ui-datepicker-buttonpane button:focus {
+  outline: thin dotted;
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+.btn:active,
+.ui-datepicker-buttonpane button:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.05);
+  outline: 0;
+}
+.btn[disabled],
+.btn[disabled]:hover,
+.btn[disabled]:active {
+  background-color: #e6e6e6;
+  background-image: none;
+  background-position: 0 0;
+  filter: inherit;
+
+  color: #666;
+
+  box-shadow: inherit;
+}
+
+.btn_primary {
+  color: #FFF;
+
+  background-color: #2d5fb3;
+  background-repeat: repeat-x;
+  background-image: -webkit-linear-gradient(top, #438ed7, #2d5fb3);
+  background-image: linear-gradient(to bottom, #438ed7, #2d5fb3);
+  filter: none;
+
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+
+  border-color: #2d5fb3 #2d5fb3 #003f81;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+}
+.btn_primary:hover {
+  color: #FFF;
+}
+.buttonsBlock {
+    padding-left: 1em;
+    margin-top: 1.5em;
+}
+.label {
+    padding-left: 1em;
+}
+.btn + .btn {
+    margin-left: 1em;
+}
+
         </style>
     </head>
     <body class="app">
@@ -151,10 +244,13 @@ p.messageEmpty {
             </div>
             <div class="title" id="title">Configure Server URL</div>
         </div>
-		<p>Enter server URL:</p>
+		<!-- <p class="label">Enter server URL:</p> -->
         <div><input type="url" required id="server-url" value=""></div>
-        <button type="button" id="btn">Save</button>
-        <button type="button" id="close">cancel</button>
+        <div class="buttonsBlock">
+            <button type="button" id="btn" class="btn btn_primary">Save</button>
+            <button type="button" id="close" class="btn">cancel</button>
+        </div>
+
         <div class="debug"></div>
         <script src="./server-config-browser.js"></script>
     </body>
