@@ -1,0 +1,32 @@
+body {
+    overflow: hidden;
+}
+
+#header {
+    height: 35px;
+    margin: 0;
+    color: #F1F4F7;
+    background-color: #575757;
+    border-bottom: 2px solid #393939;
+    font-weight: bold;
+}
+
+#header .title {
+    margin: 0 0 0 3px;
+    padding: 7px 0 14px 40px;
+    background: url(../img/teamcity.svg) no-repeat left 2px;
+    background-size: 32px 32px;
+}
+
+#header .actions {
+    float: right;
+    padding: 7px 0 14px;
+    font-size: 16px;
+}
+
+#header a.refresh,
+#header a.close {
+    margin: 0 5px;
+    text-decoration: none;
+    color: #FFF;
+}
