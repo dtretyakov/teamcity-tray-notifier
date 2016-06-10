@@ -75,6 +75,10 @@ app.on('ready', function() {
     }
 });
 
+app.on('browser-window-created',function(e,window) {
+    window.setMenu(null);
+});
+
 if (process.platform === 'darwin') {
     app.dock && app.dock.hide();
 }

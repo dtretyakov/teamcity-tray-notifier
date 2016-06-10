@@ -14,7 +14,8 @@ module.exports = function (serverURL) {
         webPreferences: {
             nodeIntegration: false
         },
-        show: true
+        show: true,
+        title: "Login to TeamCity"
     });
 
     let webContents = loginWin.webContents;
