@@ -22,7 +22,7 @@ function createTestNotification() {
     let notificationOptions = {
         title: 'Title from options',
         body: 'Lorem Ipsum Dolor Sit Amet',
-        icon: path.join(__dirname, 'icon.png'),
+        icon: path.resolve(path.join(__dirname, '../teamcity@1024.png')),
         clickCallback: () => {
             shell.openExternal('https://github.com/dtretyakov/teamcity-tray-notifier');
         }

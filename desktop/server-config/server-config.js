@@ -11,7 +11,7 @@ let serverConfigurationWindow = null;
 function createServerConfigurationWindow() {
     serverConfigurationWindow = new BrowserWindow({
         width: 500,
-        height: 300,
+        height: 200,
         frame: false
     });
 

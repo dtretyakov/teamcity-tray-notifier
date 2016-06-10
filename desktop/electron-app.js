@@ -2,7 +2,6 @@
 const electron = require('electron');
 const {
     app,
-    clipboard,
     ipcMain: ipc,
     Menu,
     Tray
@@ -19,13 +18,15 @@ let isAuthenticated = false;
 let appIcon = null;
 let contextMenu;
 
-let productNameVersion = app.getName() + ' v' + app.getVersion();
+let productNameVersion = require('./productNameVersion');
+const constants = require('./constants');
 
 windowManager.registerWindow('__notifications', require('./notifications/notifications-window'));
 windowManager.registerWindow('__server-config', require('./server-config/server-config'));
 windowManager.registerWindow('__sockets', require('./socket-client/socket-client'));
 windowManager.registerWindow('__login', require('./login'));
 windowManager.registerWindow('__logout', require('./logout'));
+windowManager.registerWindow('__builds', require('./builds/builds'));
 
 global.updateLoginStatus = (newLoginStatus) => {
     isAuthenticated = newLoginStatus;
@@ -44,7 +45,6 @@ ipc.on('server-url-updated', (e, newServerURL) => {
     }
 
     serverURL = newServerURL;
-
     doLogin();
 });
 
@@ -75,55 +75,25 @@ app.on('ready', function() {
     }
 });
 
-app.dock && app.dock.hide();
+if (process.platform === 'darwin') {
+    app.dock && app.dock.hide();
+}
 
 function putInTray() {
     const iconPath = path.join(__dirname,'icon.png');
+    let menuTemplate = require('./menu');
+    findByLabel(menuTemplate, constants.loginLabel).click = doLogin;
+    findByLabel(menuTemplate, constants.logoutLabel).click = logout;
+    findByLabel(menuTemplate, constants.viewBuildsLabel).click = () => {
+        windowManager.getOrCreateWindow('__builds', serverURL);
+    };
+    findByLabel(menuTemplate, constants.configureUrlLabel).click = () => {
+        windowManager.getOrCreateWindow('__server-config', serverURL);
+    };
+
     appIcon = new Tray(iconPath);
-    contextMenu = Menu.buildFromTemplate([
-        {
-            label: productNameVersion,
-            click: function () {
-                clipboard.writeText(productNameVersion);
-            }
-        },
-        {
-            type: 'separator'
-        },
-        {
-            label: 'Login...',
-            click: function () {
-                doLogin();
-            },
-            enabled: false
-        },
-        {
-            label: 'Logout...',
-            click: function () {
-                logout();
-            },
-            enabled: false
-        },
-        {
-            type: 'separator'
-        },
-        {
-            label: 'Send test notification',
-            click: function () {
-                let notificationsWin = windowManager.getOrCreateWindow('__notifications');
-                notificationsWin.webContents.send('test-notification');
-            }
-        },
-        {
-            type: 'separator'
-        },
-        {
-            label: 'Quit',
-            click: function () {
-                app.quit();
-            }
-        }
-    ]);
+
+    contextMenu = Menu.buildFromTemplate(menuTemplate);
     toggleSocketConnectionStatus(false);
 
     let loginOrConnect = function () {
@@ -165,7 +135,13 @@ function toggleSocketConnectionStatus(isConnected) {
 }
 
 function toggleLoginLogoutStatus() {
+    findByLabel(contextMenu.items, constants.loginLabel).enabled = !isAuthenticated;
+    findByLabel(contextMenu.items, constants.logoutLabel).enabled = isAuthenticated;
+    findByLabel(contextMenu.items, constants.viewBuildsLabel).enabled = isAuthenticated;
+}
 
-    contextMenu.items[2].enabled = !isAuthenticated;
-    contextMenu.items[3].enabled = isAuthenticated;
+function findByLabel(target, label) {
+    return target.filter(function (item) {
+        return item.label === label;
+    })[0];
 }
