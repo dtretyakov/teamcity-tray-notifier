@@ -3,11 +3,13 @@ const {
     BrowserWindow,
     dialog
 } = require('electron');
+const path = require('path');
 
 let loggingIn = false;
 let loginWin = null;
 
 module.exports = function (serverURL) {
+    const iconPath = path.join(__dirname,'../icon.png');
     loginWin = new BrowserWindow({
         width: 1000,
         height: 800,
@@ -15,7 +17,9 @@ module.exports = function (serverURL) {
             nodeIntegration: false
         },
         show: true,
-        title: "Login to TeamCity"
+        title: "Login to TeamCity",
+        center: true,
+        icon: iconPath
     });
 
     let webContents = loginWin.webContents;
