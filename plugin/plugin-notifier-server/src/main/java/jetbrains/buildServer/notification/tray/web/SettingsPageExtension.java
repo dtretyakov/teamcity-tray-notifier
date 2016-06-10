@@ -13,11 +13,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class SettingsPageExtension extends SimplePageExtension {
 
-  private final String notifierSettingsJsp = "trayNotifierSettings.jsp";
-
-  public SettingsPageExtension(PagePlaces pagePlaces) {
+  public SettingsPageExtension(@NotNull final PagePlaces pagePlaces) {
     super(pagePlaces);
-    setIncludeUrl(notifierSettingsJsp);
+    setIncludeUrl("trayNotifierSettings.jsp");
     setPlaceId(PlaceId.NOTIFIER_SETTINGS_FRAGMENT);
     setPluginName(NotifierConstants.NOTIFIER_TYPE);
   }
