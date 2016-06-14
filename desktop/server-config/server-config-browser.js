@@ -31,7 +31,7 @@ function validateURL(url) {
     }
 }
 
-ipc.on('got-url', (e, url) => {
+ipc.on('got-url', (e, url, sender) => {
     serverUrlInput.value = url;
 });
 

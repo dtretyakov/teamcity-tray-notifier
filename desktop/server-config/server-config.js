@@ -17,14 +17,14 @@ function createServerConfigurationWindow(serverURL) {
         frame: false,
         center: true,
         icon: iconPath,
-        title: "Configure Server URL"
+        title: 'Configure Server URL'
+    });
+
+    serverConfigurationWindow.webContents.on('dom-ready', () => {
+        serverConfigurationWindow.webContents.send('got-url', serverURL);
     });
 
     serverConfigurationWindow.loadURL(`file://${__dirname}/server-config.html`);
-
-    serverConfigurationWindow.webContents.on('dom-loaded', () => {
-        serverConfigurationWindow.webContents.send('got-url', serverURL);
-    });
 
     ipc.on('server-url-updated', () => {
         serverConfigurationWindow.close();
