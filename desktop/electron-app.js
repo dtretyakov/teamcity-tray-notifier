@@ -1,25 +1,29 @@
 /* teamcity-tray-notifier main process */
-const electron = require('electron');
 const {
     app,
     ipcMain: ipc,
     Menu,
-    Tray
-} = electron;
+    Tray,
+    shell
+} = require('electron');
+
+const {
+    productNameVersion,
+    findByLabel
+} = require('./utils');
+
 const path = require('path');
 
-let { getServerUrl, saveServerUrl } = require('./server-url');
-let serverURL = null;
+const { getServerUrl, saveServerUrl } = require('./server-url');
+const windowManager = require('./utils/window-manager');
+const constants = require('./constants');
 
-var windowManager = require('./window-manager');
 global.windowManager = windowManager;
-let isAuthenticated = false;
 
+let serverURL = null;
+let isAuthenticated = false;
 let appIcon = null;
 let contextMenu;
-
-let productNameVersion = require('./productNameVersion');
-const constants = require('./constants');
 
 windowManager.registerWindow('__notifications', require('./notifications/notifications-window'));
 windowManager.registerWindow('__server-config', require('./server-config/server-config'));
@@ -60,6 +64,12 @@ ipc.on('show-configuration-window', () => {
 
 ipc.on('close-configuration-window', () => {
     windowManager.getOrCreateWindow('__server-config').close();
+});
+
+ipc.on('open-url-in-browser', (e, url) => {
+    if (url) {
+        shell.openExternal(url);
+    }
 });
 
 app.on('ready', function() {
@@ -148,10 +158,4 @@ function toggleLoginLogoutStatus() {
     findByLabel(contextMenu.items, constants.loginLabel).enabled = !isAuthenticated;
     findByLabel(contextMenu.items, constants.logoutLabel).enabled = isAuthenticated;
     findByLabel(contextMenu.items, constants.viewBuildsLabel).enabled = isAuthenticated;
-}
-
-function findByLabel(target, label) {
-    return target.filter(function (item) {
-        return item.label === label;
-    })[0];
 }

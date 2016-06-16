@@ -1,6 +1,5 @@
 const {
-    ipcRenderer: ipc,
-    shell
+    ipcRenderer: ipc
 } = require('electron');
 const path = require('path');
 
@@ -8,12 +7,12 @@ ipc.on('test-notification', function () {
     createTestNotification();
 });
 
-ipc.on('send-notification', (e, title, body, eventName) => {
+ipc.on('send-notification', (e, title, body, eventName, eventParams) => {
     showNotification({
         title,
         body,
         clickCallback: eventName ? function () {
-            ipc.send(eventName);
+            ipc.send(eventName, eventParams);
         } : null
     });
 });
@@ -22,9 +21,9 @@ function createTestNotification() {
     let notificationOptions = {
         title: 'Title from options',
         body: 'Lorem Ipsum Dolor Sit Amet',
-        icon: path.resolve(path.join(__dirname, '../teamcity@1024.png')),
+        icon: path.resolve(path.join(__dirname, '../icon@2x.png')),
         clickCallback: () => {
-            shell.openExternal('https://github.com/dtretyakov/teamcity-tray-notifier');
+            ipc.send('open-url-in-browser', 'https://github.com/dtretyakov/teamcity-tray-notifier');
         }
     };
 

@@ -33,10 +33,12 @@ global.initEverything = function () {
     request.onMessage = function (response) {
         let responseObject = JSON.parse(response.responseBody);
         let responseText = '';
+        let url = '';
 
         switch (responseObject.type) {
         case 'build':
             responseText = `${responseObject.build.buildName} #${responseObject.build.buildNumber} ${responseObject.build.status}`;
+            url = responseObject.build.url;
             break;
         case 'investigation':
             responseText = `investigation Tests: ${responseObject.investigation.tests.length}, Build Problems: ${responseObject.investigation.buildProblems.length}`;
@@ -48,7 +50,12 @@ global.initEverything = function () {
             responseText = `Test "${responseObject.test.testName}" ${responseObject.test.state}`;
             break;
         }
-        new Notification(`[${serverURL}]`, { body: responseText });
+        let notification = new Notification(`[${serverURL}]`, { body: responseText });
+        if (url) {
+            notification.addEventListener('click', () => {
+                global.ipc.send('open-url-in-browser', url);
+            });
+        }
     };
 
     request.onClose = function () {

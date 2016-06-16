@@ -5,7 +5,7 @@ const {
 } = require('electron');
 const constants = require('./constants');
 
-let productNameVersion = require('./productNameVersion');
+let productNameVersion = require('./utils').productNameVersion;
 
 module.exports = [
     {

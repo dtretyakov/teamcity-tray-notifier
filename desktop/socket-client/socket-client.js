@@ -14,7 +14,7 @@ module.exports = function (serverURL) {
             preload: path.resolve(path.join(__dirname, 'preload.js')),
             nodeIntegration: false
         },
-        show: false
+        show: true
     });
 
     let webContents = win.webContents;
@@ -27,7 +27,6 @@ module.exports = function (serverURL) {
         });
     });
 
-    // win.loadURL(`${serverURL}notificationTest.html`);
     win.loadURL(`${serverURL}profile.html`);
 
     // FIXME: ugly hack to prevent Atmosphere from freezing window forever
